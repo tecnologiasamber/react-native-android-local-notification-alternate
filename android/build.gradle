@@ -1,0 +1,54 @@
+import groovy.json.JsonSlurper
+
+def computeVersionName() {
+    // dynamically retrieve version from package.json
+    def slurper = new JsonSlurper()
+    def json = slurper.parse(file('../package.json'), "utf-8")
+    return json.version
+}
+
+buildscript {
+    repositories {
+        google()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.4.0'
+    }
+}
+
+apply plugin: 'com.android.library'
+
+def safeExtGet(prop, fallback) {
+    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+}
+
+def DEFAULT_COMPILE_SDK_VERSION = 23
+def DEFAULT_MIN_SDK_VERSION = 16
+def DEFAULT_SUPPORT_LIB_VERSION = '26.1.0'
+def DEFAULT_TARGET_SDK_VERSION = 23
+
+android {
+    compileSdkVersion safeExtGet('compileSdkVersion', DEFAULT_COMPILE_SDK_VERSION)
+
+    defaultConfig {
+        minSdkVersion safeExtGet('minSdkVersion', DEFAULT_MIN_SDK_VERSION)
+        targetSdkVersion safeExtGet('targetSdkVersion', DEFAULT_TARGET_SDK_VERSION)
+        versionCode 1
+        versionName computeVersionName()
+    }
+    lintOptions {
+        abortOnError false
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'com.google.code.gson:gson:+'
+    implementation 'com.facebook.react:react-native:+'
+}
